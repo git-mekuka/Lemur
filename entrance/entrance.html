@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <title>Lemur - entrance</title>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="static/style.css">
+        <link rel="icon" href="static/img/icon.svg">
+    </head>
+    <body>
+        <div id="login-view" class="login-view-hidden">
+            <div id="login-logo">
+                <img src="static/img/lemur.svg" alt="lemur logo" width="70%">
+            </div>
+            <input placeholder="Введите логин" type="text" name="username" id="login-username" autocomplete="off">
+            <input placeholder="Введите пароль" type="password" name="password" id="login-password" autocomplete="off">
+            <button onclick="getEntranceData()">Начать сессию</button>
+            <p id="login-status" class="login-status-hidden">Не удалось начать сессию. Неверное имя пользователя или пароль.</p>
+        </div>
+        <script src="static/script.js"></script>
+    </body>
+</html>

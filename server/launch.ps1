@@ -1,0 +1,3 @@
+cd server
+.\env\Scripts\activate
+uvicorn main:app --reload 
