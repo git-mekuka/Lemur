@@ -68,6 +68,9 @@ class EventData(BaseModel):
     device: str
     countryCode: str
     region: str
+    browser: str
+    trafficSource: str
+    lang: str
 
 @app.post("/events", summary="Отправление события", tags=["Data"])
 def post_events(event_data: EventData):

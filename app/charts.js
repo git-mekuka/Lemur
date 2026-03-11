@@ -39,7 +39,7 @@ function Charts(eventMetrics, action = null) {
         labels: eventMetrics[1].day,
         datasets: [
           {
-            label: "# Человек посетило сайт",
+            label: "# Посещений веб-ресурса",
             data: eventMetrics[1].metrics,
             borderWidth: 2, 
             borderColor: "rgba(255, 65, 119, 0.9)", 

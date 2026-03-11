@@ -41,6 +41,10 @@ let notFound2 = document.getElementById("notFound2");
 let regionListContainer = document.getElementById("regionListContainer");
 let countryListContainer = document.getElementById("countryListContainer");
 let map = document.getElementById("map");
+let deviceSmartphonePrecent = document.getElementById("deviceSmartphonePrecent");
+let deviceDesktopPrecent = document.getElementById("deviceDesktopPrecent");
+let deviceTabletPrecent = document.getElementById("deviceTabletPrecent");
+let deviceOtherPrecent = document.getElementById("deviceOtherPrecent");
 let choiceMonthScore = 0;
 let profileScore = 0;
 let createCategoryScore = 0;
@@ -683,10 +687,19 @@ async function getEventsMetrics(
   Charts(eventMetrics, action);
   visitMetrics.textContent = eventMetrics[1].metricsSum;
   visitGrowth.textContent = eventMetrics[1].growth;
+
   deviceDesktop.textContent = eventMetrics[1].desktop;
   deviceSmartphone.textContent = eventMetrics[1].smartphone;
   deviceTablet.textContent = eventMetrics[1].tablet;
   deviceOther.textContent = eventMetrics[1].otherDevice;
+
+  allDeviceSum = eventMetrics[1].desktop + eventMetrics[1].smartphone + eventMetrics[1].tablet + eventMetrics[1].otherDevice;
+
+  deviceDesktopPrecent.textContent = Math.round(eventMetrics[1].desktop / allDeviceSum * 1000) / 10;
+  deviceSmartphonePrecent.textContent = Math.round(eventMetrics[1].smartphone / allDeviceSum * 1000) / 10;
+  deviceTabletPrecent.textContent = Math.round(eventMetrics[1].tablet / allDeviceSum * 1000) / 10;
+  deviceOtherPrecent.textContent = Math.round(eventMetrics[1].otherDevice / allDeviceSum * 1000) / 10;
+
   clickButtonsMetrics.textContent = eventMetrics[0].metricsSum;
   clickLinksMetrics.textContent = eventMetrics[2].metricsSum;
 

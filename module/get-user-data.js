@@ -5,7 +5,16 @@ async function postEvent(eventType){
   let dateData = new Date();
 
   if (eventType == "eventSiteEntry"){
-    let location = await getGeolocation();
+    let location = await (async function geolocationType() {
+      const geoData = await getGeolocation();
+      
+      if (typeof geoData === "string") {
+        return JSON.parse(geoData);
+      } else {
+        return geoData;
+      }
+    })();
+
     eventData = {
       event: eventType,
       date: dateData.getDate() + "." + (dateData.getMonth() + 1) + "." + dateData.getFullYear(),
@@ -14,6 +23,9 @@ async function postEvent(eventType){
       device: getDevice(),
       countryCode: location.countryCode,
       region: location.region,
+      browser: getBrowser(),
+      trafficSource: getTrafficSource(),
+      lang: navigator.language || navigator.userLanguage
     }
   }
   else{
@@ -25,6 +37,9 @@ async function postEvent(eventType){
       device: getDevice(),
       countryCode: "[null]",
       region: "[null]",
+      browser: getBrowser(),
+      trafficSource: getTrafficSource(),
+      lang: navigator.language || navigator.userLanguage
     }
   }
  
@@ -32,26 +47,89 @@ async function postEvent(eventType){
   makeRequest(`${LEMUR_SITE_URL}/events`, "POST", {"Content-Type": "application/json"}, eventData);
 }
 
-function getDevice(){
-  const userAgent = navigator.userAgent;
+function getTrafficSource() {
+    const referrer = document.referrer;
+    const currentDomain = window.location.hostname;
+    
+    let source = 'direct';
 
-  const isSmartphone = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
-  const isTablet = /iPad|Tablet|Tab|Kindle|Silk/i.test(userAgent);
-  const isDesktop = /Windows NT|Macintosh|Mac OS X|Linux x86_64|WOW64|Win64/i.test(userAgent);
+    if (referrer) {
+      try {
+        const referrerUrl = new URL(referrer);
+
+        if (referrerUrl.hostname === currentDomain) {
+          source = 'internal'
+        } 
+        else {
+          source = 'referral';
+        }
+      } 
+      catch (error) {
+        console.log('Ошибка парсинга реферера:', error);
+      }
+    }
+    return source;
+}
+
+function getBrowser(){
+  const ua = navigator.userAgent;
+
+  if (/EdgA|EdgiOS|Edg\//i.test(ua)) 
+    return "Microsoft Edge";
+  if (/OPR|Opera/i.test(ua)) 
+    return "Opera";
+  if (/Brave\//i.test(ua)) 
+    return "Brave";
+  if (/SamsungBrowser/i.test(ua)) 
+    return "Samsung Internet";
+  if (/UCBrowser/i.test(ua)) 
+    return "UC Browser";
+  if (/YaBrowser/i.test(ua)) 
+    return "Yandex Browser";
+  if (/CriOS/i.test(ua)) 
+    return "Chrome iOS";
+  if (/FxiOS/i.test(ua)) 
+    return "Firefox iOS";
+  if (/Chrome\/\d+/i.test(ua) && !/Edg|OPR|Brave\//i.test(ua)) 
+    return "Chrome";
+  if (/Firefox\/\d+/i.test(ua)) 
+    return "Firefox";
+  if (/Safari\/\d+/i.test(ua) && !/Chrome|Chromium|CriOS|Android/i.test(ua)) 
+    return "Safari";
+  if (/MSIE |Trident\//i.test(ua)) 
+    return "Internet Explorer";
+  if (/Android/i.test(ua) && /Version\/\d+/i.test(ua)) 
+    return "Android Browser";
+
+  return "Unknown";
+}
+
+function getDevice(){
+  const ua = navigator.userAgent;
+
+  const isTablet = /\b(iPad|Tablet|Tab|PlayBook|Silk|Kindle|Nexus 7|Nexus 9|SM-T|GT-P|Xoom|SCH-I800|Lenovo|FIRE|Pixel C)\b/i.test(ua)
+    || (/\bAndroid\b/i.test(ua) && !/\bMobile\b/i.test(ua));
+
+  const isSmartphone = /\b(iPhone|iPod|Android.*Mobile|Windows Phone|IEMobile|BlackBerry|BB10|Mobile)\b/i.test(ua)
+    && !isTablet;
+
+  const isDesktop = /\b(Windows NT|Macintosh|Mac OS X|X11|CrOS|Linux x86_64|WOW64|Win64)\b/i.test(ua)
+    && !isTablet && !isSmartphone;
+
   const isOther = !isSmartphone && !isTablet && !isDesktop;
 
-  let devices = {
+  const devices = {
     smartphone: isSmartphone,
     tablet: isTablet,
     desktop: isDesktop,
     otherDevice: isOther
-  }
+  };
 
-  for (device in devices){
+  for (const device in devices){
     if (devices[device]){
       return device;
     }
-  } 
+  }
 }
 
 async function getIp(){
@@ -61,21 +139,34 @@ async function getIp(){
 }
 
 async function getGeolocation() {
-  result = await makeRequest(`http://ip-api.com/json/${"212.94.18.0"}`, "GET", {"Content-Type": "application/json"});
-  geolocation = await result.json();
+  const storedGeo = sessionStorage.getItem("geolocation");
+  
+  if (storedGeo) {
+    return JSON.parse(storedGeo);
+  } 
+  else {
+    try {
+      const result = await makeRequest(`http://ip-api.com/json/${"92.39.217.239"}`, "GET", {"Content-Type": "application/json"});
+      const geolocation = await result.json();
 
-  let country = null
-  let region = null
+      let countryCode = null;
+      let region = null;
 
-  if (geolocation.status == "fail" ){
-    return {country: country, region: region}
+      if (geolocation.status == "success") {
+        countryCode = geolocation.countryCode;
+        region = geolocation.region;
+      }
+
+      const geoData = { countryCode: countryCode, region: region };
+      sessionStorage.setItem("geolocation", JSON.stringify(geoData));
+      
+      return geoData;
+    } 
+    catch (error) {
+      console.error("Ошибка получения геолокации:", error);
+      return { countryCode: null, region: null };
+    }
   }
-  else if (geolocation.status == "success" ){
-    countryCode = geolocation.countryCode
-    region = geolocation.region
-  }
-
-  return {countryCode: countryCode, region: region};
 }
 
 async function makeRequest(url, method, headers, bodyData = 0) {
@@ -97,3 +188,4 @@ async function makeRequest(url, method, headers, bodyData = 0) {
 }
 
 postEvent('eventSiteEntry')
+console.log(getTrafficSource() + " " + getBrowser() + " " + getDevice())
