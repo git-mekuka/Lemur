@@ -1,3 +1,3 @@
 cd server
-.\env\Scripts\activate
+.\venv\Scripts\activate
 uvicorn main:app --reload 

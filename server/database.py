@@ -1,5 +1,5 @@
 import psycopg2 # type: ignore
-import psycopg2.extras  # type: ignore
+import psycopg2.extras # type: ignore
 from colorama import Fore, Style
 from datetime import date
 
