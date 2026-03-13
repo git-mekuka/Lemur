@@ -2,14 +2,18 @@ import psycopg2 # type: ignore
 import psycopg2.extras # type: ignore
 from colorama import Fore, Style
 from datetime import date
+import json
+import os
 
-connection = psycopg2.connect(
-    dbname="lemurdb",
-    user="postgres", 
-    password="ad12mH2#innn",
-    host="127.0.0.1",
-    port="5432"
-)
+# Загрузка конфигурации из config.json
+config_path = os.path.join(os.path.dirname(__file__), '..', 'config.json')
+with open(config_path, 'r', encoding='utf-8') as f:
+    config = json.load(f)
+
+db_config = config['database']
+db_config['port'] = int(db_config['port'])
+
+connection = psycopg2.connect(**db_config)
 
 def login_status(login, password):
     cursor = connection.cursor()
@@ -219,26 +223,3 @@ def get_users_data_db():
     data = cursor.fetchall()
     
     return data
-
-def add_category(user, name, description):
-    cursor = connection.cursor()
-
-    try:
-        cursor.execute("INSERT INTO categories VALUES(%s, %s, %s)", (user, name, description))
-        connection.commit()
-        cursor.close()
-
-        print(Fore.BLUE + Style.BRIGHT +"Lemur [DataBase]:" + Fore.RESET + Style.RESET_ALL + " Успешный запрос в базу данных")
-    except Exception as e:
-        print(Fore.LIGHTRED_EX + Style.BRIGHT +"Lemur [DataBase]:" + Fore.RESET + Style.RESET_ALL + f" Не удалось выполнить запрос в базу данных. Ошибка: {e}")
-
-def get_category(user):
-    cursor = connection.cursor()
-    try:
-        cursor.execute('SELECT * FROM categories WHERE "user" = %s', (user,))
-        print(cursor.fetchall)
-        print(Fore.BLUE + Style.BRIGHT +"Lemur [DataBase]:" + Fore.RESET + Style.RESET_ALL + " Успешный запрос в базу данных")
-    except Exception as e:
-        print(Fore.LIGHTRED_EX + Style.BRIGHT +"Lemur [DataBase]:" + Fore.RESET + Style.RESET_ALL + f" Не удалось выполнить запрос в базу данных. Ошибка: {e}")
-
-get_user_permission("admin")

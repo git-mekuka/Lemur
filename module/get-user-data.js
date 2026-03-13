@@ -1,4 +1,4 @@
-const LEMUR_SITE_URL = "http://127.0.0.1:8000"
+const LEMUR_SITE_URL = window.location.origin
 
 async function postEvent(eventType){
   let eventData = null;
@@ -24,8 +24,7 @@ async function postEvent(eventType){
       countryCode: location.countryCode,
       region: location.region,
       browser: getBrowser(),
-      trafficSource: getTrafficSource(),
-      lang: navigator.language || navigator.userLanguage
+      trafficSource: getTrafficSource()
     }
   }
   else{
@@ -44,7 +43,7 @@ async function postEvent(eventType){
   }
  
   console.log(eventData)
-  makeRequest(`${LEMUR_SITE_URL}/events`, "POST", {"Content-Type": "application/json"}, eventData);
+  makeRequest(`${LEMUR_SITE_URL}/api/events`, "POST", {"Content-Type": "application/json"}, eventData);
 }
 
 function getTrafficSource() {
@@ -133,7 +132,7 @@ function getDevice(){
 }
 
 async function getIp(){
-  let result = await makeRequest(`${LEMUR_SITE_URL}/client_ip`, "GET", {"Content-Type": "application/json"});
+  let result = await makeRequest(`${LEMUR_SITE_URL}/api/client_ip`, "GET", {"Content-Type": "application/json"});
   let ip = await result.json();
   return ip;
 }

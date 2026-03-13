@@ -2,15 +2,25 @@ from fastapi import FastAPI, HTTPException, Response, Request # type: ignore
 from fastapi.responses import HTMLResponse, RedirectResponse # type: ignore
 from fastapi.middleware.cors import CORSMiddleware # type: ignore
 from fastapi.staticfiles import StaticFiles # type: ignore
+
 from pydantic import BaseModel # type: ignore
+
 from colorama import Fore, Style
-from database import login_status, edit_events, get_events_metrics, add_category, get_user_permission, get_users_data_db
+
+from database import login_status, edit_events, get_events_metrics, get_user_permission, get_users_data_db
+
 from datetime import datetime, timedelta
+import time
 import secrets
 import os
 import urllib.request
 import urllib.error
-import time
+import json
+
+with open('D:\Lemur\config.json', 'r', encoding='utf-8') as file:
+    config_data = json.load(file)
+
+site_url = config_data["site"]["URL"]
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="../entrance"), name="static")
@@ -26,7 +36,7 @@ app.add_middleware(
 def load_html(file_name):
     with open(file_name, "r", encoding="utf-8") as file: 
         return file.read()
-    
+
 @app.get("/", summary="Получение сайта авторизации.", tags=["Entrance"])
 def entarnce():
     return HTMLResponse(load_html("../entrance/entrance.html"))
@@ -41,7 +51,7 @@ class AdminData(BaseModel):
 
 sessions = {}
 
-@app.post("/login", summary="Вход в приложение.", tags=["Entrance"])
+@app.post("/api/login", summary="Вход в приложение.", tags=["Entrance"])
 def login(admin_data: AdminData, response: Response):
 
     if login_status(admin_data.username, admin_data.password) == True:
@@ -72,7 +82,7 @@ class EventData(BaseModel):
     trafficSource: str
     lang: str
 
-@app.post("/events", summary="Отправление события", tags=["Data"])
+@app.post("/api/events", summary="Отправление события", tags=["Data"])
 def post_events(event_data: EventData):
     
     try:
@@ -85,7 +95,7 @@ class FilterData(BaseModel):
     monthFilter: str
     yearFilter: str
 
-@app.post("/events/metrics", summary="Получение метрик события", tags=["Data"])
+@app.post("/api/events/metrics", summary="Получение метрик события", tags=["Data"])
 def get_events(filter_data: FilterData):
     try:
         if filter_data.yearFilter != 'none' and filter_data.monthFilter != 'none':
@@ -128,7 +138,7 @@ def create_session(user):
         "end": end
     }
 
-@app.get("/sessionUser", summary="Имя пользователя", tags=["Data"])
+@app.get("/api/sessionUser", summary="Имя пользователя", tags=["Data"])
 def postSessionUser(request: Request):
     token = request.cookies.get("token")
 
@@ -137,9 +147,7 @@ def postSessionUser(request: Request):
     else:
         return {"user": "Undefined"}
 
-site_url = "http://127.0.0.1:5500/module/index.html"
-
-@app.get("/check_status")
+@app.get("/api/check_status")
 def get_site_status():
     global site_url
     try:
@@ -164,7 +172,7 @@ def get_site_status():
     except:
          return "Undefined"
 
-@app.get("/check_TTFB")
+@app.get("/api/check_TTFB")
 def get_site_TTFB():
     global site_url
     start_time = time.time()
@@ -184,7 +192,7 @@ def get_site_TTFB():
     except:
         return "--"
 
-@app.get("/site_data") 
+@app.get("/api/site_data") 
 def get_data():
     site_data = {
         "URL": site_url,
@@ -193,18 +201,18 @@ def get_data():
     }
     return site_data    
 
-@app.get("/client_ip")
+@app.get("/api/client_ip")
 def get_ip(request: Request):
     client_ip = request.client.host
     return client_ip
 
-@app.delete("/exitSession")
+@app.delete("/api/exitSession")
 def exit_session(response: Response, request: Request):
     token = request.cookies.get("token")
     del sessions[token]
     response.delete_cookie("token")
 
-@app.get("/userData")
+@app.get("/api/userData")
 def get_user_data(request: Request):
     user = sessions[request.cookies.get("token")]["user"]
     permission = get_user_permission(user)
@@ -215,21 +223,11 @@ def get_user_data(request: Request):
     }
     return user_data
 
-class CategoryData(BaseModel):
-    user: str
-    name: str
-    description: str
-
-@app.get("/usersData")
+@app.get("/api/usersData")
 def get_users_data():
     users_data = get_users_data_db()
 
     return users_data
-
-@app.post("/categoryData")
-def post_category_data(category_data: CategoryData):
-    add_category(category_data.user, category_data.name, category_data.description)
-    print(category_data)
 
 @app.middleware("http")
 async def test(request: Request, call_next):

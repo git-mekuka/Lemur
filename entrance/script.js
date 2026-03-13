@@ -1,4 +1,4 @@
-const LEMUR_SITE_URL = "http://127.0.0.1:8000"
+const LEMUR_SITE_URL = window.location.origin
 
 let loginUsernameInput = document.getElementById("login-username");
 let loginPasswordInput = document.getElementById("login-password");
@@ -13,7 +13,7 @@ async function getEntranceData(){
         password: loginPasswordInput.value
     };
 
-    let result = await makeRequest(`${LEMUR_SITE_URL}/login`, "POST", {"Content-Type": "application/json"}, adminData);
+    let result = await makeRequest(`${LEMUR_SITE_URL}/api/login`, "POST", {"Content-Type": "application/json"}, adminData);
     if(result.status == 200){
         window.location.href = `${LEMUR_SITE_URL}/app`;
     }
@@ -30,12 +30,3 @@ async function makeRequest(url, method, headers, bodyData) {
     });
     return result;
 }
-
-// (() => {
-//     // Получаем текущий хост (IP или localhost)
-//     const hostname = window.location.hostname;  // 127.0.0.1 или 192.168.31.135
-//     const port = '8000';  // Ваш реальный порт Uvicorn
-    
-//     console.log(`http://${hostname}:${port}`)
-//     return `http://${hostname}:${port}`;
-// })();

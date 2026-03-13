@@ -1,3 +1,3 @@
 cd server
 .\venv\Scripts\activate
-uvicorn main:app --reload 
+python run_server.py

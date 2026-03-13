@@ -1,4 +1,4 @@
-const LEMUR_SITE_URL = "http://127.0.0.1:8000"
+const LEMUR_SITE_URL = window.location.origin
 
 let visitMetrics = document.getElementById("visitMetrics");
 let clickButtonsMetrics = document.getElementById("clickButtonsMetrics");
@@ -530,7 +530,7 @@ async function createCategory() {
       categoryData.user = siteUser;
 
       makeRequest(
-        `${LEMUR_SITE_URL}/categoryData`,
+        `${LEMUR_SITE_URL}/api/categoryData`,
         "POST",
         { "Content-Type": "application/json" },
         categoryData,
@@ -546,7 +546,7 @@ async function createCategory() {
       categoryData.description = "none";
 
       makeRequest(
-        `${LEMUR_SITE_URL}/categoryData`,
+        `${LEMUR_SITE_URL}/api/categoryData`,
         "POST",
         { "Content-Type": "application/json" },
         categoryData,
@@ -586,7 +586,7 @@ function openCategoryAction(action) {
 });
 
 function exitSession() {
-  makeRequest(`${LEMUR_SITE_URL}/exitSession`, "DELETE", {
+  makeRequest(`${LEMUR_SITE_URL}/api/exitSession`, "DELETE", {
     "Content-Type": "application/json",
   });
   window.location.href = `${LEMUR_SITE_URL}`;
@@ -651,7 +651,7 @@ function setFilter() {
 }
 
 async function getSiteData() {
-  let result = await makeRequest(`${LEMUR_SITE_URL}/site_data`, "GET", {
+  let result = await makeRequest(`${LEMUR_SITE_URL}/api/site_data`, "GET", {
     "Content-Type": "application/json",
   });
   let siteData = await result.json();
@@ -678,7 +678,7 @@ async function getEventsMetrics(
   action,
 ) {
   let result = await makeRequest(
-    `${LEMUR_SITE_URL}/events/metrics`,
+    `${LEMUR_SITE_URL}/api/events/metrics`,
     "POST",
     { "Content-Type": "application/json" },
     filter,
@@ -755,7 +755,7 @@ async function getEventsMetrics(
 }
 
 async function getUserData() {
-  let result = await makeRequest(`${LEMUR_SITE_URL}/userData`, "GET", {
+  let result = await makeRequest(`${LEMUR_SITE_URL}/api/userData`, "GET", {
     "Content-Type": "application/json",
   });
   let userData = await result.json();
@@ -790,7 +790,7 @@ async function getUserData() {
 }
 
 async function  getUsersData() {
-  let result = await makeRequest(`${LEMUR_SITE_URL}/usersData`, "GET", {
+  let result = await makeRequest(`${LEMUR_SITE_URL}/api/usersData`, "GET", {
     "Content-Type": "application/json",
   });
   let usersData = await result.json();
@@ -827,33 +827,23 @@ async function CopyUserDataButton(text) {
 }
 
 function initializeTippy() {
-  // Уничтожаем старые экземпляры tippy, если были
   if (window.tippyInstances) {
     window.tippyInstances.forEach(instance => instance.destroy());
   }
   
-  // Создаем новые экземпляры
   window.tippyInstances = tippy('.copy-button', {
     content: 'Скопировано!',
     trigger: 'click',
     placement: 'top',
     theme: 'green',
-    
     onShow(instance) {
-      // Очищаем предыдущий таймаут
       if (instance._timeoutId) {
         clearTimeout(instance._timeoutId);
       }
-      
-      // Получаем текст для копирования
       const textToCopy = instance.reference.dataset.copyText;
-      
       if (textToCopy) {
-        // Копируем в буфер обмена
         navigator.clipboard.writeText(textToCopy)
       }
-      
-      // Таймер на скрытие
       instance._timeoutId = setTimeout(() => {
         instance.hide();
       }, 1000);
