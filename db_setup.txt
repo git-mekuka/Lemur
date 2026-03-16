@@ -1,0 +1,22 @@
+Команда для настройки базы данных: создаем базу данных, таблицы admins и events
+
+CREATE DATABASE lemur_db;
+
+\c lemur_db;
+
+CREATE TABLE IF NOT EXISTS admins (
+    user_id INTEGER PRIMARY KEY,
+    login VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    permission VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS events (
+    event VARCHAR(255) NOT NULL,
+    date TIMESTAMP WITH TIME ZONE NOT NULL,
+    device VARCHAR(255),
+    country_code VARCHAR(255),
+    region VARCHAR(255),
+    browser VARCHAR(255),
+    traffic_source VARCHAR(255)
+);

@@ -17,10 +17,11 @@ import urllib.request
 import urllib.error
 import json
 
-with open('D:\Lemur\config.json', 'r', encoding='utf-8') as file:
+with open('\Lemur\config.json', 'r', encoding='utf-8') as file:
     config_data = json.load(file)
 
 site_url = config_data["site"]["URL"]
+session_max_age_seconds = config_data.get("auth", {}).get("session_max_age_seconds", 3600)
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="../entrance"), name="static")
@@ -62,7 +63,9 @@ def login(admin_data: AdminData, response: Response):
         response.set_cookie(
             key="token", 
             value=f"{token}", 
-            max_age=3600
+            max_age=session_max_age_seconds,
+            httponly=True,
+            samesite="lax"
         )
         print(Style.BRIGHT + Fore.LIGHTGREEN_EX + "Lemur [Main]:" + Style.RESET_ALL + " Вход успешен!")
 
@@ -124,7 +127,7 @@ def create_session(user):
 
     token = secrets.token_urlsafe(32)
     start = datetime.now()
-    end = (start + timedelta(hours=1)).strftime("%d.%m.%Y %H:%M")
+    end = (start + timedelta(seconds=session_max_age_seconds)).strftime("%d.%m.%Y %H:%M")
     start = start.strftime("%d.%m.%Y %H:%M")
 
     for session in sessions:

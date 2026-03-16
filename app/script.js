@@ -644,8 +644,13 @@ function setFilter() {
   let monthFilter = choosenMonth;
   let yearFilter = yearInput.value;
 
+  if (!yearFilter){
+    yearInput.value = new Date().getFullYear();
+  }
+
   filter.monthFilter = monthFilter ? monthFilter : "none";
   filter.yearFilter = yearFilter ? yearFilter : "none";
+
   console.log(filter);
   getEventsMetrics(filter, "update");
 }

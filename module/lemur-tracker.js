@@ -1,4 +1,4 @@
-const LEMUR_SITE_URL = window.location.origin
+const LEMUR_SITE_URL = window.location.origin // Укажите URL API
 
 async function postEvent(eventType){
   let eventData = null;
@@ -187,4 +187,3 @@ async function makeRequest(url, method, headers, bodyData = 0) {
 }
 
 postEvent('eventSiteEntry')
-console.log(getTrafficSource() + " " + getBrowser() + " " + getDevice())

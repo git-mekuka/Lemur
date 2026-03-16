@@ -27,8 +27,6 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  min-width: 1750px;
-  min-height: 750px;
 }
 
 button {
@@ -913,6 +911,12 @@ path[data-code]:focus {
 }
 .hide {
   display: none !important;
+}
+
+@media (max-width: 1500px) {
+  :root{
+    font-size: 0.9rem;
+  }
 }
 @media (max-width: 1200px) {
   .main-visit,
