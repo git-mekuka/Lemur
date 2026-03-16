@@ -19,6 +19,6 @@
     "URL": "http://127.0.0.1:5500/module/index.html"
   },
   "auth": {
-    "session_max_age_seconds": 3600
+    "session_max_age_seconds": 3600 
   }
 }

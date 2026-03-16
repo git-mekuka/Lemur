@@ -27,6 +27,7 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  min-width: 865px;
 }
 
 button {
@@ -260,12 +261,15 @@ ul {
   margin: 10px 0 0 0;
   display: flex;
   gap: 20px;
+  width: 100%; /* Добавьте, если нужно */
+  max-width: 100%; /* Убедитесь, что нет ограничений */
 }
 
 .visit-chart {
   width: 59.5%;
   min-height: 300px;
-  height: 100%;
+  flex-basis: auto; /* или 59.5% */
+  flex-shrink: 0; /* Запретить сжатие */
 }
 
 .visit-metrics span {
@@ -564,23 +568,8 @@ input[type="number"]::-webkit-outer-spin-button {
 .main-all-tech {
   display: flex;
   flex-direction: column;
-  width: 50%;
+  width: 100%;
   gap: 15px;
-}
-.error-info {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 10px;
-}
-.error-tag {
-  padding: 3px 5px 3px 5px;
-  font-size: 0.75rem;
-  border: 1px solid #be2f2f;
-  border-radius: 7px;
-  color: #be2f2f;
-  user-select: none;
-  pointer-events: none;
 }
 .TTFB,
 .site-status {
@@ -638,7 +627,7 @@ input[type="number"]::-webkit-outer-spin-button {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  padding: 12px;
+  padding: 8px;
   border-radius: 10px;
 }
 .device-type-info {
@@ -913,9 +902,58 @@ path[data-code]:focus {
   display: none !important;
 }
 
+@media (max-width: 1700px) {
+  :root{
+    font-size: 0.95rem;
+  }
+  .device-type{
+    padding: 7px;
+  }
+  .visit-metrics{
+    padding: 22px;
+  }
+}
+@media (max-width: 1600px) {
+  .device-type{
+    padding: 6.5px;
+  }
+  .visit-metrics{
+    padding: 20px;
+  }
+  .visit-metrics span{
+    font-size: 1.8rem;
+  }
+}
 @media (max-width: 1500px) {
   :root{
     font-size: 0.9rem;
+  }
+  .device-type{
+    padding: 6px;
+  }
+  .visit-metrics{
+    padding: 18px;
+  }
+}
+@media (max-width: 1300px) {
+  :root{
+    font-size: 0.85rem;
+  }
+}
+/* @media (max-width: 1355px) {
+  .device-type{
+    flex-direction: column;
+    gap: 10px;
+  }
+} */
+@media (max-width: 1245px) {
+  .here{
+    display: none;
+  }
+}
+@media (max-width: 1260px) {
+  #chooseTag {
+    display: none;
   }
 }
 @media (max-width: 1200px) {
@@ -923,48 +961,37 @@ path[data-code]:focus {
   .main-event {
     flex-direction: column;
   }
-
-  .visit-chart,
   .event-chart {
     width: 100%;
   }
   .visit-chart {
     padding: 0 20px 0 0;
+    width: 100% !important;
   }
   .all-visit-metrics {
     width: 100%;
+    padding: 0px 20px 0 0;
+  }
+  .geo-visit{
+    gap: 20px;
+    flex-direction: column;
+  }
+  .info-geo{
+    padding: 0 20px 0 0;
+    width: 100%;
+    height: 40vh;
+  }
+  .rf-map{
+    padding: 0 20px 0 0;
+    width: 100%;
+  }
+  .main-event{
+    gap: 20px;
   }
 }
 
-@media (max-width: 768px) {
-  .main {
-    flex-direction: column;
-  }
-
-  .nav {
-    flex-direction: row;
-    border-right: none;
-    border-bottom: solid 1px var(--primary-border-color);
-    padding: 15px;
-    min-width: auto;
-  }
-
-  .nav-article {
-    flex-direction: row;
-    gap: 20px;
-  }
-
-  .nav-information-container {
-    flex-direction: row;
-    align-items: center;
-    gap: 15px;
-    margin-top: 0;
-  }
-
-  .data-filter-div {
-    flex-direction: column;
-  }
-  .all-visit-metrics {
-    width: 100%;
+@media (max-width: 865px) {
+  .exit-text{
+    display: none;
   }
 }

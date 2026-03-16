@@ -30,7 +30,7 @@
                 <div>
                     <button class="header-buttons" id="profileButton"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0-8 0M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg></button>
                 </div>
-                <button class="header-buttons" id="exit-session" onclick="exitSession()"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 6L6 18M6 6l12 12"/></svg><span>Завершить сессию</span></button>
+                <button class="header-buttons" id="exit-session" onclick="exitSession()"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 6L6 18M6 6l12 12"/></svg><span class="exit-text">Завершить сессию</span></button>
             </div>
         </div>
         <div class="main">
@@ -39,13 +39,13 @@
                     <div class="article" onclick="openAnalyticssPage()">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18px" height="18px" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 13a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1zm12-4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1zM9 5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1zM4 20h14"/></svg>
                         <span>Аналитика</span>
-                        <p class="here" id="analyticsHereTag">вы здесь</p>
+                        <p class="here" id="analyticsHereTag"><span class="here-text">вы здесь</span></p>
                     </div>
                     <div class="article-hr"></div>
                     <div class="article" onclick="openAdminsPage()">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18px" height="18px" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0-18 0"/><path d="M9 10a3 3 0 1 0 6 0a3 3 0 1 0-6 0m-2.832 8.849A4 4 0 0 1 10 16h4a4 4 0 0 1 3.834 2.855"/></g></svg>
                         <span>Администраторы</span>
-                        <p class="here" id="adminsHereTag" hidden>вы здесь</p>
+                        <p class="here" id="adminsHereTag" hidden><span class="here-text">вы здесь</span></p>
                     </div>
                     <div class="article-hr"></div>
                 </div>
@@ -127,12 +127,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="errors-data-tech hide">
-                                <p class="error-info"><span class="error-tag">ERRORS</span> Ошибки, возникающие у пользователей</p>
-                                <div class="errors-data-container">
-
-                                </div>
-                            </div>
                         </div>
                     </div>
                     <div class="visit">
@@ -147,7 +141,7 @@
                             <div class="all-visit-metrics">
                                 <div class="all-visit-metrics-1">
                                     <div class="visit-metrics">
-                                        <p>Посещений веб-ресурса</p> 
+                                        <p>Посещений ресурса</p> 
                                         <span id="visitMetrics">0</span>
                                     </div>   
                                     <div class="visit-metrics">
