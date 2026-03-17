@@ -1,4 +1,4 @@
-const LEMUR_SITE_URL = window.location.origin // Укажите URL API
+const LEMUR_SITE_URL = "http://localhost:8000" // Укажите URL API
 
 async function postEvent(eventType){
   let eventData = null;
@@ -38,7 +38,6 @@ async function postEvent(eventType){
       region: "[null]",
       browser: getBrowser(),
       trafficSource: getTrafficSource(),
-      lang: navigator.language || navigator.userLanguage
     }
   }
  
@@ -100,7 +99,7 @@ function getBrowser(){
   if (/Android/i.test(ua) && /Version\/\d+/i.test(ua)) 
     return "Android Browser";
 
-  return "Unknown";
+  return "Другое";
 }
 
 function getDevice(){
@@ -145,7 +144,7 @@ async function getGeolocation() {
   } 
   else {
     try {
-      const result = await makeRequest(`http://ip-api.com/json/${"92.39.217.239"}`, "GET", {"Content-Type": "application/json"});
+      const result = await makeRequest(`http://ip-api.com/json/${"92.39.217.161"}`, "GET", {"Content-Type": "application/json"});
       const geolocation = await result.json();
 
       let countryCode = null;

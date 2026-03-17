@@ -51,10 +51,10 @@ def new_admin(login, password):
     connection.commit()
     cursor.close()
 
-def edit_events(event, date, time, timezoneOffset, device, countryCode, region):
+def edit_events(event, date, time, timezoneOffset, device, countryCode, region, browser, trafficSource):
     cursor = connection.cursor()
     try:
-        cursor.execute("INSERT INTO events VALUES (%s, %s, %s, %s, %s)", (event, f"{date} {time} {"+" if int(timezoneOffset) > 0 else ""}{timezoneOffset}", device, countryCode, region))
+        cursor.execute("INSERT INTO events VALUES (%s, %s, %s, %s, %s, %s, %s)", (event, f"{date} {time} {"+" if int(timezoneOffset) > 0 else ""}{timezoneOffset}", device, countryCode, region, browser, trafficSource))
         print(Fore.BLUE + Style.BRIGHT +"Lemur [DataBase]:" + Fore.RESET + Style.RESET_ALL + " Успешный запрос в базу данных")
     except:
         print(Fore.LIGHTRED_EX + Style.BRIGHT +"Lemur [DataBase]:" + Fore.RESET + Style.RESET_ALL + " Не удалось выполнить запрос в базу данных")
@@ -176,6 +176,45 @@ def get_events_metrics(event, month = date.today().month, year = date.today().ye
                                 region""", (month, year))
             regionList = cursor.fetchall()
 
+            cursor.execute("""SELECT
+                                browser,
+                                COUNT(*) AS count
+                            FROM events
+                            WHERE
+                                event = 'eventSiteEntry'
+                                AND browser IS NOT NULL
+                                AND EXTRACT(MONTH FROM date) = %s
+                                AND EXTRACT(YEAR FROM date) = %s
+                            GROUP BY
+                                browser;""", (month, year))
+            browserList = cursor.fetchall()
+
+            cursor.execute("""SELECT
+                                traffic_source,
+                                COUNT(*) AS count
+                            FROM events
+                            WHERE
+                                event = 'eventSiteEntry'
+                                AND traffic_source IS NOT NULL
+                                AND EXTRACT(MONTH FROM date) = %s
+                                AND EXTRACT(YEAR FROM date) = %s
+                            GROUP BY
+                                traffic_source;""", (month, year))
+            trafficSourceList = cursor.fetchall()
+
+            direct = 0
+            referral = 0
+            internal = 0
+
+            for source, cnt in trafficSourceList:
+                if source == 'direct':
+                    direct = cnt
+                elif source == 'referral':
+                    referral = cnt
+                elif source == 'internal':
+                    internal = cnt
+
+
             event_data = {
                 "event": event,
                 "day": day,
@@ -187,7 +226,11 @@ def get_events_metrics(event, month = date.today().month, year = date.today().ye
                 "tablet": tablet,
                 "otherDevice": other_device,
                 "countryList": countryList,
-                "regionList": regionList
+                "regionList": regionList,
+                "browserList": browserList,
+                "direct": direct,
+                "referral": referral,
+                "internal": internal
             }
         else:
             event_data = {
@@ -221,5 +264,18 @@ def get_users_data_db():
 
     cursor.execute('SELECT "user_id","login","permission" FROM admins')
     data = cursor.fetchall()
-    
+
+    print(Fore.BLUE + Style.BRIGHT +"Lemur [DataBase]:" + Fore.RESET + Style.RESET_ALL + " Успешный запрос в базу данных")
+
     return data
+
+    
+def delete_user_db(user_id):
+    cursor = connection.cursor()
+
+    try:
+        cursor.execute("DELETE FROM admins WHERE user_id = %s", (user_id,))
+        return "200"
+    except Exception as e:
+        print(Fore.LIGHTRED_EX + Style.BRIGHT +"Lemur [DataBase]:" + Fore.RESET + Style.RESET_ALL + f" Не удалось выполнить запрос в базу данных. Ошибка: {e}")
+        return "400"

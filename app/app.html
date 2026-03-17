@@ -19,12 +19,7 @@
             <div class="session">
                 <div class="session-name">
                     <p>Активная сессия: <span id="sessionUser"></span></p>
-                </div class="session-info"> 
-                <div hidden>
-                    <p>Начало</p>
-                    <p>Права</p>
-                    <button>Завершить сессию</button>
-                </div>
+                </div> 
             </div>
             <div class="header-button-container">
                 <div>
@@ -90,45 +85,16 @@
                 <div class="nav-information-container">
                     <div class="nav-information">
                         <div>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0-18 0m9-3h.01"/><path d="M11 12h1v4h1"/></g></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0-18 0m9-3h.01"/><path d="M11 12h1v4h1"/></g></svg>
                         </div>
                         <div>
-                            <p>Возникли вопросы? Найдите ответ, прочитав документацию ниже.</p>
+                            <p>Lemur-desktop v1.0.0</p>
                         </div>
-                    </div>
-                    <div class="nav-documentation">
-                        <button class="nav-documentation-button"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 19a9 9 0 0 1 9 0a9 9 0 0 1 9 0M3 6a9 9 0 0 1 9 0a9 9 0 0 1 9 0M3 6v13m9-13v13m9-13v13"/></svg>Документация</button>
                     </div>
                 </div>
             </div>
             <div class="section">
                 <div class="analytics" id="analyticsSections">
-                    <div class="tech">
-                        <div class="info-tech">
-                            <h2>Техническая информация</h2>
-                        </div>
-                        <div class="main-tech">
-                            <div class="main-all-tech">
-                                <h3>Состояние сайта</h3>
-                                <div class="main-data-tech">
-                                    <p>URL: <span id="siteUrl" class="site-data">Получение данных</span></p>
-                                    <div class="site-status">
-                                        <p>Статус: </p>
-                                        <div class="online-icon hide"  id="onlineIcon">
-                                            <div class="effect-online-icon"></div>
-                                            <div class="background-online-icon"></div>
-                                            <div class="main-online-icon"></div>
-                                        </div>
-                                        <span id="siteStatus" class="site-data">Получение данных</span>
-                                    </div>
-                                    <div class="TTFB">
-                                        <p>TTFB: <span id="TTFB" class="site-data">Получение данных</span></p>
-                                        <span class="mc-tag">МС</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                     <div class="visit">
                         <div class="info-visit">
                             <h2>Посещаемость</h2>
@@ -141,7 +107,7 @@
                             <div class="all-visit-metrics">
                                 <div class="all-visit-metrics-1">
                                     <div class="visit-metrics">
-                                        <p>Посещений ресурса</p> 
+                                        <p>Посещений</p> 
                                         <span id="visitMetrics">0</span>
                                     </div>   
                                     <div class="visit-metrics">
@@ -297,6 +263,22 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="main-visit3">
+                            <div class="visit-traffic-source">
+                                <p class="info-ts-bt">Посещаемость по источникам трафика</p>
+                                <div class="traffic-source-container">
+                                    <p class="traffic-source-type">Прямые заходы<span><span id="tst-direct">0</span> посещений (<span id="tst-direct-precent">0</span>% от всех)</span></p>
+                                    <p class="traffic-source-type">Внутренние переходы<span><span id="tst-internal">0</span> посещений (<span id="tst-internal-precent">0</span>% от всех)</span></p>
+                                    <p class="traffic-source-type">Реферальные заходы<span><span id="tst-referral">0</span> посещений (<span id="tst-referral-precent">0</span>% от всех)</span></p>
+                                </div>
+                            </div>
+                            <div class="visit-browser-top">
+                                <p class="info-ts-bt">Посещаемость по браузерам</p>
+                                <div class="browser-top-container" id="browserListContainer">
+                                    <span id="notFound3" class="not-found">Записи не найдены</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="event">
                         <div class="info-event">
@@ -322,10 +304,33 @@
                             </div>
                         </div>
                     </div>
+                    <div class="tech">
+                        <div class="main-tech">
+                            <div class="main-all-tech">
+                                <h3>Состояние сайта</h3>
+                                <div class="main-data-tech">
+                                    <p>URL: <span id="siteUrl" class="site-data">Получение данных</span></p>
+                                    <div class="site-status">
+                                        <p>Статус: </p>
+                                        <div class="online-icon hide"  id="onlineIcon">
+                                            <div class="effect-online-icon"></div>
+                                            <div class="background-online-icon"></div>
+                                            <div class="main-online-icon"></div>
+                                        </div>
+                                        <span id="siteStatus" class="site-data">Получение данных</span>
+                                    </div>
+                                    <div class="TTFB">
+                                        <p>TTFB: <span id="TTFB" class="site-data">Получение данных</span></p>
+                                        <span class="mc-tag">МС</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="admins hide" id="adminsSections">
                     <div>
-                        <h2>Список администраторов:</h2>
+                        <h2>Список администраторов</h2>
                     </div>
                     <div class="admin-list" id="adminsList">
                     </div>

@@ -45,6 +45,8 @@ let deviceSmartphonePrecent = document.getElementById("deviceSmartphonePrecent")
 let deviceDesktopPrecent = document.getElementById("deviceDesktopPrecent");
 let deviceTabletPrecent = document.getElementById("deviceTabletPrecent");
 let deviceOtherPrecent = document.getElementById("deviceOtherPrecent");
+let browserListContainer = document.getElementById("browserListContainer");
+let currentlyUser;
 let choiceMonthScore = 0;
 let profileScore = 0;
 let createCategoryScore = 0;
@@ -665,7 +667,6 @@ async function getSiteData() {
   TTFB.textContent = siteData.TTFB;
   siteStatus.textContent = siteData.status;
 
-  TTFB.style.color = "white";
   if (siteData.status == "Online") {
     siteStatus.style.color = "#48c759";
     onlineIcon.classList.remove("hide");
@@ -700,13 +701,56 @@ async function getEventsMetrics(
 
   allDeviceSum = eventMetrics[1].desktop + eventMetrics[1].smartphone + eventMetrics[1].tablet + eventMetrics[1].otherDevice;
 
-  deviceDesktopPrecent.textContent = Math.round(eventMetrics[1].desktop / allDeviceSum * 1000) / 10;
-  deviceSmartphonePrecent.textContent = Math.round(eventMetrics[1].smartphone / allDeviceSum * 1000) / 10;
-  deviceTabletPrecent.textContent = Math.round(eventMetrics[1].tablet / allDeviceSum * 1000) / 10;
-  deviceOtherPrecent.textContent = Math.round(eventMetrics[1].otherDevice / allDeviceSum * 1000) / 10;
+  if (allDeviceSum){
+    deviceDesktopPrecent.textContent = Math.round(eventMetrics[1].desktop / allDeviceSum * 1000) / 10;
+    deviceSmartphonePrecent.textContent = Math.round(eventMetrics[1].smartphone / allDeviceSum * 1000) / 10;
+    deviceTabletPrecent.textContent = Math.round(eventMetrics[1].tablet / allDeviceSum * 1000) / 10;
+    deviceOtherPrecent.textContent = Math.round(eventMetrics[1].otherDevice / allDeviceSum * 1000) / 10;
+  }
+  else{
+    deviceDesktopPrecent.textContent = 0;
+    deviceSmartphonePrecent.textContent = 0;
+    deviceTabletPrecent.textContent = 0;
+    deviceOtherPrecent.textContent = 0;
+  }
 
   clickButtonsMetrics.textContent = eventMetrics[0].metricsSum;
   clickLinksMetrics.textContent = eventMetrics[2].metricsSum;
+
+  // Update traffic source metrics
+
+  document.getElementById("tst-direct").textContent = eventMetrics[1].direct;
+  document.getElementById("tst-referral").textContent = eventMetrics[1].referral;
+  document.getElementById("tst-internal").textContent = eventMetrics[1].internal;
+
+  let trafficSum = eventMetrics[1].direct + eventMetrics[1].referral + eventMetrics[1].internal;
+
+  if (trafficSum) {
+    document.getElementById("tst-direct-precent").textContent = Math.round(eventMetrics[1].direct / trafficSum * 1000) / 10;
+    document.getElementById("tst-referral-precent").textContent = Math.round(eventMetrics[1].referral / trafficSum * 1000) / 10;
+    document.getElementById("tst-internal-precent").textContent = Math.round(eventMetrics[1].internal / trafficSum * 1000) / 10;
+  } else {
+    document.getElementById("tst-direct-precent").textContent = 0;
+    document.getElementById("tst-referral-precent").textContent = 0;
+    document.getElementById("tst-internal-precent").textContent = 0;
+  }
+
+  let browserList = eventMetrics[1].browserList;
+
+  if (browserList.length) {
+    browserListContainer.innerHTML = ``; // или отдельный контейнер для браузеров
+    for (let i = 0; i < browserList.length; i++) {
+      let browser = browserList[i][0];
+      let value = browserList[i][1];
+      browserListContainer.innerHTML += `
+        <div class="country-object">
+          <p>${browser}</p>
+          <p>${value} посещений</p>
+        </div>`;
+    }
+  } else {
+    browserListContainer.innerHTML = `<span id="notFound1" class="not-found">Записи не найдены</span>`;
+  }
 
   let countryList = eventMetrics[1].countryList;
 
@@ -764,16 +808,16 @@ async function getUserData() {
     "Content-Type": "application/json",
   });
   let userData = await result.json();
-
+  currentlyUser = userData.permission;
+  console.log(currentlyUser)
   sessionUser.textContent = userData.user;
   tippy("#profileButton", {
     content: `
         <div class="pv2-container">
             <div class="pv2-main">
-                <img src="app/static/img/av.svg" alt="def-avatar" width="50px" height="50px">
                 <div class="pv2-user-info">
                     <p class="pv2-user-login">${userData.user}</p>
-                    <p class="pv2-user-permission">${userData.permission}</p>
+                    <p class="pv2-user-permission">Права: ${userData.permission}</p>
                 </div>
             </div>
             <div class="pv2-buttons">
@@ -781,6 +825,20 @@ async function getUserData() {
                 <button>Редактировать пароль</button>
             </div>
         </div>
+
+        <div class="pv2-edit">
+          <h4>Редактировать логин</h4>
+          <input id="editLoginInput" type="text" placeholder="Новый логин" />
+          <button id="editLoginBtn">Сохранить логин</button>
+        </div>
+
+        <div class="pv2-edit">
+          <h4>Редактировать пароль</h4>
+          <input id="oldPasswordInput" type="password" placeholder="Старый пароль" />
+          <input id="newPasswordInput" type="password" placeholder="Новый пароль" />
+          <button id="editPasswordBtn">Сохранить пароль</button>
+        </div>
+      </div> 
     `,
     theme: "dark-profile",
     trigger: "click",
@@ -801,59 +859,67 @@ async function  getUsersData() {
   let usersData = await result.json();
 
   for (let userData of usersData){
-    adminsList.innerHTML += 
-    `
-      <div class="admin-pattern">
-          <div class="main-admin-pattern">
-              <p class="data-admin-pattern"><span class="info-data-admin-pattern">id:</span>${userData[0]}</p>
-              <p class="data-admin-pattern"><span class="info-data-admin-pattern">login:</span>${userData[1]}</p>
-              <p class="data-admin-pattern"><span class="info-data-admin-pattern">permission:</span>${userData[2]}</p>
+    if (currentlyUser == "owner"){
+      console.log("Список администраторов смотрит owner");
+      if (userData[2] == "owner"){
+        adminsList.innerHTML += 
+        `
+          <div class="admin-pattern">
+              <div class="main-admin-pattern">
+                  <p class="data-admin-pattern"><span class="info-data-admin-pattern">id:</span>${userData[0]}</p>
+                  <p class="data-admin-pattern"><span class="info-data-admin-pattern">login:</span>${userData[1]}</p>
+                  <p class="data-admin-pattern"><span class="info-data-admin-pattern">permission:</span>${userData[2]}</p>
+              </div>
           </div>
-          <div class="button-admin-pattern">
-              <button>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16px" height="16px" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M7 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-1"/><path d="M20.385 6.585a2.1 2.1 0 0 0-2.97-2.97L9 12v3h3zM16 5l3 3"/></g></svg>
-              </button>
-              <button class="copy-button" data-copy-text="id: ${userData[0]} login: ${userData[1]} permission: ${userData[2]}">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16px" height="16px" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M7 9.667A2.667 2.667 0 0 1 9.667 7h8.666A2.667 2.667 0 0 1 21 9.667v8.666A2.667 2.667 0 0 1 18.333 21H9.667A2.667 2.667 0 0 1 7 18.333z"/><path d="M4.012 16.737A2 2 0 0 1 3 15V5c0-1.1.9-2 2-2h10c.75 0 1.158.385 1.5 1"/></g></svg>
-              </button>
-              <button>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16px" height="16px" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16m-10 4v6m4-6v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/></svg>
-              </button>
+        `
+      }
+      else{
+        adminsList.innerHTML += 
+        `
+          <div class="admin-pattern">
+              <div class="main-admin-pattern">
+                  <p class="data-admin-pattern"><span class="info-data-admin-pattern">id:</span>${userData[0]}</p>
+                  <p class="data-admin-pattern"><span class="info-data-admin-pattern">login:</span>${userData[1]}</p>
+                  <p class="data-admin-pattern"><span class="info-data-admin-pattern">permission:</span>${userData[2]}</p>
+              </div>
+              <div class="button-admin-pattern">
+                  <button onclick="deleteUser(${userData[0]})">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16px" height="16px" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16m-10 4v6m4-6v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/></svg>
+                  </button>
+              </div>
           </div>
-      </div>
-    `
+        `
+      }
+    }
+    else{
+      console.log("Список администраторов смотрит не owner");
+      adminsList.innerHTML += 
+      `
+        <div class="admin-pattern">
+            <div class="main-admin-pattern">
+                <p class="data-admin-pattern"><span class="info-data-admin-pattern">id:</span>${userData[0]}</p>
+                <p class="data-admin-pattern"><span class="info-data-admin-pattern">login:</span>${userData[1]}</p>
+                <p class="data-admin-pattern"><span class="info-data-admin-pattern">permission:</span>${userData[2]}</p>
+            </div>
+        </div>
+      `
+    }
   }
   console.log(usersData)
-  initializeTippy()
 }
 
-async function CopyUserDataButton(text) {
-  await navigator.clipboard.writeText(text)
-}
+async function deleteUser(userId) {
+  let result = await makeRequest(`${LEMUR_SITE_URL}/api/deleteUser`, "DELETE", {"Content-Type": "application/json"}, {"id": String(userId)});
+  let status = await result.status;
 
-function initializeTippy() {
-  if (window.tippyInstances) {
-    window.tippyInstances.forEach(instance => instance.destroy());
+  if (status == 200){
+    adminsList.innerHTML = ``;
+    getUsersData();
+    console.log("Пользователь удалён");
   }
-  
-  window.tippyInstances = tippy('.copy-button', {
-    content: 'Скопировано!',
-    trigger: 'click',
-    placement: 'top',
-    theme: 'green',
-    onShow(instance) {
-      if (instance._timeoutId) {
-        clearTimeout(instance._timeoutId);
-      }
-      const textToCopy = instance.reference.dataset.copyText;
-      if (textToCopy) {
-        navigator.clipboard.writeText(textToCopy)
-      }
-      instance._timeoutId = setTimeout(() => {
-        instance.hide();
-      }, 1000);
-    },
-  });
+  else{
+    console.error("Не удалось удалить пользователя");
+  }
 }
 
 async function makeRequest(url, method, headers, bodyData = 0) {
@@ -873,7 +939,7 @@ async function makeRequest(url, method, headers, bodyData = 0) {
   }
 }
 
-getUsersData()
 getUserData();
+getUsersData();
 getEventsMetrics();
 getSiteData();

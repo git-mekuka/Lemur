@@ -7,7 +7,7 @@ from pydantic import BaseModel # type: ignore
 
 from colorama import Fore, Style
 
-from database import login_status, edit_events, get_events_metrics, get_user_permission, get_users_data_db
+from database import login_status, edit_events, get_events_metrics, get_user_permission, get_users_data_db, delete_user_db
 
 from datetime import datetime, timedelta
 import time
@@ -83,13 +83,12 @@ class EventData(BaseModel):
     region: str
     browser: str
     trafficSource: str
-    lang: str
 
 @app.post("/api/events", summary="Отправление события", tags=["Data"])
 def post_events(event_data: EventData):
     
     try:
-        edit_events(event_data.event, event_data.date, event_data.time, event_data.timezoneOffset, event_data.device, event_data.countryCode, event_data.region)
+        edit_events(event_data.event, event_data.date, event_data.time, event_data.timezoneOffset, event_data.device, event_data.countryCode, event_data.region, event_data.browser, event_data.trafficSource)
         print(Style.BRIGHT + Fore.LIGHTGREEN_EX + "Lemur [Main]:" + Style.RESET_ALL + " Отправлены данные в базу данных > events" + Style.RESET_ALL)
     except:
         print(Style.BRIGHT + Fore.LIGHTRED_EX +"Lemur [Main]:" + Style.RESET_ALL + " Не удалось отправить данные в базу данных > events")
@@ -231,6 +230,25 @@ def get_users_data():
     users_data = get_users_data_db()
 
     return users_data
+
+class Id(BaseModel):
+    id: str
+
+@app.delete("/api/deleteUser")
+def delete_user(id: Id, request: Request):
+    if get_user_permission(sessions[request.cookies.get("token")]["user"]) == "admin":
+        raise HTTPException(status_code=403, detail="Deleting users requires the 'owner' role")
+    elif get_user_permission(sessions[request.cookies.get("token")]["user"]) == "owner":
+        if id.id == "1":
+            raise HTTPException(status_code=403, detail="You cannot delete the owner user")
+        else:
+            result = delete_user_db(id.id)
+            if result == "200":
+                raise HTTPException(status_code=200, detail="User deleted successfully")
+            else:        
+                raise HTTPException(status_code=400, detail="Failed to delete user")
+    else:
+        raise HTTPException(status_code=401, detail="User not found")
 
 @app.middleware("http")
 async def test(request: Request, call_next):
