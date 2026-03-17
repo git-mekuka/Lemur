@@ -813,41 +813,173 @@ async function getUserData() {
   sessionUser.textContent = userData.user;
   tippy("#profileButton", {
     content: `
-        <div class="pv2-container">
-            <div class="pv2-main">
-                <div class="pv2-user-info">
-                    <p class="pv2-user-login">${userData.user}</p>
-                    <p class="pv2-user-permission">Права: ${userData.permission}</p>
-                </div>
-            </div>
-            <div class="pv2-buttons">
-                <button>Редактировать логин</button>
-                <button>Редактировать пароль</button>
-            </div>
+      <div class="pv2-container">
+        <div class="pv2-main">
+          <div class="pv2-user-info">
+            <p class="pv2-user-login">${userData.user}</p>
+            <p class="pv2-user-permission">Права: ${userData.permission}</p>
+          </div>
         </div>
 
-        <div class="pv2-edit">
+        <div class="pv2-buttons">
+          <button id="openEditLoginBtn" type="button">Редактировать логин</button>
+          <button id="openEditPasswordBtn" type="button">Редактировать пароль</button>
+        </div>
+
+        <div id="editLoginBlock" class="pv2-edit hide">
           <h4>Редактировать логин</h4>
           <input id="editLoginInput" type="text" placeholder="Новый логин" />
-          <button id="editLoginBtn">Сохранить логин</button>
+          <button id="editLoginBtn" type="button">Сохранить логин</button>
+          <div class="pv2-login-requirements">
+            <p id="editLoginError" class="pv2-error hide"></p>
+          </div>
         </div>
 
-        <div class="pv2-edit">
+        <div id="editPasswordBlock" class="pv2-edit hide">
           <h4>Редактировать пароль</h4>
           <input id="oldPasswordInput" type="password" placeholder="Старый пароль" />
           <input id="newPasswordInput" type="password" placeholder="Новый пароль" />
-          <button id="editPasswordBtn">Сохранить пароль</button>
+          <button id="editPasswordBtn" type="button">Сохранить пароль</button>
+          <div class="pv2-password-requirements">
+            <p id="editPasswordError" class="pv2-error hide"></p>
+          </div>
         </div>
-      </div> 
+      </div>
     `,
     theme: "dark-profile",
     trigger: "click",
     interactive: true,
-    maxWidth: "600px",
+    maxWidth: "400px",
     allowHTML: true,
     onShow(instance) {
       instance.popper.style.borderRadius = "20px";
+
+      const editLoginBlock = instance.popper.querySelector("#editLoginBlock");
+      const editPasswordBlock = instance.popper.querySelector("#editPasswordBlock");
+      const openEditLoginBtn = instance.popper.querySelector("#openEditLoginBtn");
+      const openEditPasswordBtn = instance.popper.querySelector("#openEditPasswordBtn");
+
+      if (editLoginBlock && editPasswordBlock) {
+        editLoginBlock.classList.add("hide");
+        editPasswordBlock.classList.add("hide");
+      }
+
+      if (openEditLoginBtn && openEditPasswordBtn) {
+        openEditLoginBtn.onclick = () => {
+          editLoginBlock.classList.remove("hide");
+          editPasswordBlock.classList.add("hide");
+        };
+
+        openEditPasswordBtn.onclick = () => {
+          editPasswordBlock.classList.remove("hide");
+          editLoginBlock.classList.add("hide");
+        };
+      }
+
+      const editLoginBtn = instance.popper.querySelector("#editLoginBtn");
+      const editPasswordBtn = instance.popper.querySelector("#editPasswordBtn");
+      const editLoginError = instance.popper.querySelector("#editLoginError");
+      const editPasswordError = instance.popper.querySelector("#editPasswordError");
+      const editLoginInput = instance.popper.querySelector("#editLoginInput");
+      const oldPasswordInput = instance.popper.querySelector("#oldPasswordInput");
+      const newPasswordInput = instance.popper.querySelector("#newPasswordInput");
+
+      const clearLoginError = () => {
+        if (editLoginError) {
+          editLoginError.textContent = "";
+          editLoginError.classList.add("hide");
+        }
+      };
+
+      const clearPasswordError = () => {
+        if (editPasswordError) {
+          editPasswordError.textContent = "";
+          editPasswordError.classList.add("hide");
+        }
+      };
+
+      if (editLoginBtn) {
+
+        editLoginBtn.onclick = async () => {
+
+          if (!editLoginInput) return;
+
+          const newLogin = editLoginInput.value.trim();
+          clearLoginError();
+
+          if (!newLogin) {
+            editLoginError.textContent = "Логин не может быть пустым.";
+            editLoginError.classList.remove("hide");
+            return;
+          }
+
+          if (newLogin.length > 20) {
+            editLoginError.textContent = "Логин не должен превышать 20 символов.";
+            editLoginError.classList.remove("hide");
+            editLoginInput.value = "";
+            return;
+          }
+
+          console.log("Сохранение нового логина:", newLogin);
+
+          editLoginInput.value = "";
+          clearLoginError();
+        };
+      }
+
+      if (editPasswordBtn) {
+        editLoginError.classList.add("hide");
+        editPasswordBtn.onclick = async () => {
+
+          editLoginError.classList.add("hide");
+
+          if (!oldPasswordInput || !newPasswordInput) return;
+
+          const oldPass = oldPasswordInput.value;
+          const newPass = newPasswordInput.value;
+          clearPasswordError();
+
+          if (!oldPass || !newPass) {
+            editPasswordError.textContent = "Оба поля для пароля обязательны.";
+            editPasswordError.classList.remove("hide");
+            return;
+          }
+
+          if (newPass.length > 100) {
+            editPasswordError.textContent = "Пароль не должен превышать 100 символов.";
+            editPasswordError.classList.remove("hide");
+            oldPasswordInput.value = "";
+            newPasswordInput.value = "";
+            return;
+          }
+
+          const validChars = /^[A-Za-zА-Яа-яЁё0-9!@#$%^&*()_+\-=\[\]{};:\'"\\|,.<>\/?`~]+$/;
+          if (!validChars.test(newPass)) {
+            editPasswordError.textContent = "Пароль может содержать только латиницу, кириллицу, цифры и стандартные спецсимволы.";
+            editPasswordError.classList.remove("hide");
+            oldPasswordInput.value = "";
+            newPasswordInput.value = "";
+            return;
+          }
+
+          console.log("Сохранение нового пароля:", oldPass, newPass);
+          // TODO: добавить запрос на сервер
+          oldPasswordInput.value = "";
+          newPasswordInput.value = "";
+          clearPasswordError();
+        };
+      }
     },
+    onHide(instance){
+      const editLoginError = instance.popper.querySelector("#editLoginError");
+      const editPasswordError = instance.popper.querySelector("#editPasswordError");
+
+      editPasswordError.classList.add("hide");
+      editLoginError.classList.add("hide");
+
+      editLoginError.textContent = "";
+      editPasswordError.textContent = "";
+    }
   });
   console.log(userData);
 }

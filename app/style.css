@@ -812,6 +812,24 @@ input[type="number"]::-webkit-outer-spin-button {
 .pv2-buttons button:hover {
   transform: scale(1.02);
 }
+.pv2-error {
+  color: #b3b3b3;
+  font-size: 0.8rem;
+  margin-top: 5px;
+  line-height: 1.2;
+  max-width: 230px;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+.pv2-password-requirements, .pv2-login-requirements {
+  display: flex;
+  justify-content: center;
+  text-align: center;
+}
+.hide {
+  display: none !important;
+}
 .pv2-edit input {
   border-radius: 10px;
   padding: 10px;
