@@ -7,7 +7,7 @@ from pydantic import BaseModel # type: ignore
 
 from colorama import Fore, Style
 
-from database import login_status, edit_events, get_events_metrics, get_user_permission, get_users_data_db, delete_user_db
+from database import login_status, edit_events, get_events_metrics, get_user_permission, get_users_data_db, delete_user_db, edit_password_db, edit_login_db
 
 from datetime import datetime, timedelta
 import time
@@ -249,6 +249,41 @@ def delete_user(id: Id, request: Request):
                 raise HTTPException(status_code=400, detail="Failed to delete user")
     else:
         raise HTTPException(status_code=401, detail="User not found")
+
+class Passwords(BaseModel):
+    oldPassword: str
+    newPassword: str
+
+@app.put("/api/editPassword")
+def edit_password(passwords: Passwords, request: Request):
+    token = request.cookies.get("token")
+    user = sessions[token]["user"]
+
+    if login_status(user, passwords.oldPassword) == True and token in sessions:
+        edit_result = edit_password_db(user, passwords.newPassword)
+        if edit_result == "200":
+            raise HTTPException(status_code=200, detail="Password changed successfully")
+        else:
+            raise HTTPException(status_code=400, detail="Failed to change password")
+    else:
+        raise HTTPException(status_code=400, detail="Incorrect old password or user not authenticated")
+
+class NewLogin(BaseModel):
+    newLogin: str
+
+@app.put("/api/editLogin")
+def edit_login(newLogin: NewLogin, request: Request):
+    token = request.cookies.get("token")
+    user = sessions[token]["user"]
+
+    if token in sessions:
+        edit_result = edit_login_db(user, newLogin.newLogin)
+        if edit_result == "200":
+            raise HTTPException(status_code=200, detail="Login changed successfully")
+        else:
+            raise HTTPException(status_code=400, detail="Failed to change login")
+    else:
+        raise HTTPException(status_code=400, detail="User not authenticated")
 
 @app.middleware("http")
 async def test(request: Request, call_next):

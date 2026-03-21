@@ -4,17 +4,20 @@
         <title>Lemur - entrance</title>
         <meta charset="utf-8">
         <link rel="stylesheet" href="static/style.css">
-        <link rel="icon" href="static/img/icon.svg">
+        <link rel="icon" href="static/img/n_icon.svg">
     </head>
     <body>
         <div id="login-view" class="login-view-hidden">
             <div id="login-logo">
-                <img src="static/img/lemur.svg" alt="lemur logo" width="70%">
+                <img src="static/img/n_lemur_l.svg" alt="lemur logo" width="70%">
             </div>
             <input placeholder="Введите логин" type="text" name="username" id="login-username" autocomplete="off">
             <input placeholder="Введите пароль" type="password" name="password" id="login-password" autocomplete="off">
             <button onclick="getEntranceData()">Начать сессию</button>
             <p id="login-status" class="login-status-hidden">Не удалось начать сессию. Неверное имя пользователя или пароль.</p>
+        </div>
+        <div class="author">
+            <img src="static/img/n_mekuka.svg" alt="author logo" width="100%">
         </div>
         <script src="static/script.js"></script>
     </body>

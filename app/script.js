@@ -920,7 +920,16 @@ async function getUserData() {
             return;
           }
 
-          console.log("Сохранение нового логина:", newLogin);
+          let result = await makeRequest(`${LEMUR_SITE_URL}/api/editLogin`, "PUT", {"Content-Type": "application/json"}, {"newLogin": newLogin});
+          
+          if (result.status == 200) {
+            exitSession();
+          }
+          else if (result.status == 400) {
+            editLoginError.textContent = "Не удалось сменить логин.";
+            editLoginError.classList.remove("hide");
+            return;
+          }
 
           editLoginInput.value = "";
           clearLoginError();
@@ -962,8 +971,24 @@ async function getUserData() {
             return;
           }
 
-          console.log("Сохранение нового пароля:", oldPass, newPass);
-          // TODO: добавить запрос на сервер
+          let result = await makeRequest(`${LEMUR_SITE_URL}/api/editPassword`, "PUT", {"Content-Type": "application/json"}, {"oldPassword": oldPass, "newPassword": newPass});
+
+          console.log("Status:", result.status);
+          console.log("Status text:", result.statusText);
+          console.log("Response ok:", result.ok);
+          
+          if (result.status == 200) {
+            exitSession();
+          }
+          else if (result.status == 400) {
+              oldPasswordInput.value = "";
+              newPasswordInput.value = "";
+              
+              editPasswordError.textContent = "Не удалось сменить пароль.Старый пароль введён неверно.";
+              editPasswordError.classList.remove("hide");
+              return;
+          }
+
           oldPasswordInput.value = "";
           newPasswordInput.value = "";
           clearPasswordError();
@@ -978,7 +1003,10 @@ async function getUserData() {
       editLoginError.classList.add("hide");
 
       editLoginError.textContent = "";
+      editLoginInput.value = "";
       editPasswordError.textContent = "";
+      oldPasswordInput.value = "";
+      newPasswordInput.value = "";
     }
   });
   console.log(userData);

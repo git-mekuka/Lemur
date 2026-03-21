@@ -262,7 +262,7 @@ def get_user_permission(user):
 def get_users_data_db():
     cursor = connection.cursor()
 
-    cursor.execute('SELECT "user_id","login","permission" FROM admins')
+    cursor.execute('SELECT "user_id","login","permission" FROM admins ORDER BY user_id ASC')
     data = cursor.fetchall()
 
     print(Fore.BLUE + Style.BRIGHT +"Lemur [DataBase]:" + Fore.RESET + Style.RESET_ALL + " Успешный запрос в базу данных")
@@ -275,6 +275,26 @@ def delete_user_db(user_id):
 
     try:
         cursor.execute("DELETE FROM admins WHERE user_id = %s", (user_id,))
+        return "200"
+    except Exception as e:
+        print(Fore.LIGHTRED_EX + Style.BRIGHT +"Lemur [DataBase]:" + Fore.RESET + Style.RESET_ALL + f" Не удалось выполнить запрос в базу данных. Ошибка: {e}")
+        return "400"
+
+def edit_password_db(user, new_password):
+    cursor = connection.cursor()
+
+    try:
+        cursor.execute("UPDATE admins SET password = %s WHERE login = %s", (new_password, user))
+        return "200"
+    except Exception as e:
+        print(Fore.LIGHTRED_EX + Style.BRIGHT +"Lemur [DataBase]:" + Fore.RESET + Style.RESET_ALL + f" Не удалось выполнить запрос в базу данных. Ошибка: {e}")
+        return "400"
+    
+def edit_login_db(user, new_login):
+    cursor = connection.cursor()
+
+    try:
+        cursor.execute("UPDATE admins SET login = %s WHERE login = %s", (new_login, user))
         return "200"
     except Exception as e:
         print(Fore.LIGHTRED_EX + Style.BRIGHT +"Lemur [DataBase]:" + Fore.RESET + Style.RESET_ALL + f" Не удалось выполнить запрос в базу данных. Ошибка: {e}")
