@@ -39,10 +39,16 @@ button {
   cursor: pointer;
   transition: all 0.2s ease-in-out;
   padding: 10px 15px;
+  user-select: none;
 }
 
 button:hover {
   transform: scale(1.05);
+}
+
+input:focus {
+    border: solid 1px var(--primary-border-color) !important;
+    outline: none !important;
 }
 
 p,
@@ -434,7 +440,19 @@ input[type="number"]::-webkit-outer-spin-button {
   flex-direction: column;
   gap: 20px;
 }
-
+.admins-info{
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  align-items: center;
+}
+.admins-info button{
+  padding: 8px;
+  font-size: 0.9rem;
+}
+.admins-info button:hover{
+  transform: scale(1.01);
+}
 .data-filter-div div {
   display: flex;
 }
@@ -945,6 +963,51 @@ path[data-code]:focus {
   flex-direction: row;
   justify-content: space-between;
   padding: 8px;
+}
+.add-admin{
+  width: 350px;
+  display: flex;
+  flex-direction: column;
+  padding: 5px 0 0 0;
+}
+.add-admin-main{
+  padding: 15px 0 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.add-admin-main input{
+  border-radius: 10px;
+  padding: 10px;
+  border: 1px solid var(--primary-border-color);
+  background-color: transparent;
+  font-size: 0.9rem;
+  color: var(--primary-text-color);
+}
+.add-admin-main input::-ms-reveal{
+  filter: invert(100%);
+}
+.add-admin-main input:focus, #editLoginInput:focus, #oldPasswordInput:focus, #newPasswordInput:focus {
+    border: solid 1px #585858 !important;
+    outline: none !important;
+}
+.add-admin-main button{
+  border-radius: 10px;
+  padding: 10px;
+  border: 1px solid var(--primary-border-color);
+  background-color: transparent;
+  font-size: 0.9rem;
+}
+.add-admin-requirements{
+  display: flex;
+  justify-content: center;
+  text-align: center;
+}
+.add-admin-requirements p{
+  color: #b3b3b3;
+  font-size: 0.8rem;
+  line-height: 1.2;
+  text-align: center;
 }
 .hide {
   display: none !important;

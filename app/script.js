@@ -809,7 +809,6 @@ async function getUserData() {
   });
   let userData = await result.json();
   currentlyUser = userData.permission;
-  console.log(currentlyUser)
   sessionUser.textContent = userData.user;
   tippy("#profileButton", {
     content: `
@@ -1020,7 +1019,6 @@ async function  getUsersData() {
 
   for (let userData of usersData){
     if (currentlyUser == "owner"){
-      console.log("Список администраторов смотрит owner");
       if (userData[2] == "owner"){
         adminsList.innerHTML += 
         `
@@ -1052,7 +1050,6 @@ async function  getUsersData() {
       }
     }
     else{
-      console.log("Список администраторов смотрит не owner");
       adminsList.innerHTML += 
       `
         <div class="admin-pattern">
@@ -1081,6 +1078,99 @@ async function deleteUser(userId) {
     console.error("Не удалось удалить пользователя");
   }
 }
+
+tippy("#addNewAdmin", {
+    content: `
+      <div class="add-admin">
+          <h3>Создание нового администратора</h3>
+          <div class="add-admin-main">
+              <input id="newAdminLogin" type="text" placeholder="Придумайте логин">
+              <input id="newAdminPassword" type="password"" placeholder="Придумайте пароль">
+              <button>Создать</button>
+              <div class="add-admin-requirements">
+                <p class="add-admin-error" id="addAdminError"></p>
+              </div>
+          </div>
+      </div>
+    `,
+    theme: "dark-profile",
+    trigger: "click",
+    interactive: true,
+    maxWidth: "400px",
+    allowHTML: true,
+    onShow(instance) {
+      const loginInput = instance.popper.querySelector("#newAdminLogin");
+      const passwordInput = instance.popper.querySelector("#newAdminPassword");
+      const createBtn = instance.popper.querySelector("button");
+      const errorText = instance.popper.querySelector("#addAdminError");
+
+      function clearError() {
+        errorText.textContent = "";
+        errorText.classList.add("hide");
+      }
+
+      createBtn.onclick = async () => {
+        const newLogin = loginInput.value;
+        const newPassword = passwordInput.value;
+
+        if (!loginInput) return;
+
+        clearError();
+
+        if (!newLogin) {
+          errorText.textContent = "Логин не может быть пустым.";
+          errorText.classList.remove("hide");
+          return;
+        }
+
+        if (newLogin.length > 20) {
+          errorText.textContent = "Логин не должен превышать 20 символов.";
+          errorText.classList.remove("hide");
+          loginInput.value = "";
+          return;
+        }
+
+        if (!passwordInput) return;
+
+        clearError();
+
+        if (!newPassword) {
+          errorText.textContent = "Пароль не может быть пустым.";
+          errorText.classList.remove("hide");
+          return;
+        }
+
+        if (newPassword.length > 100) {
+          errorText.textContent = "Пароль не должен превышать 100 символов.";
+          errorText.classList.remove("hide");
+          passwordInput.value = "";
+          return;
+        }
+        const validChars = /^[A-Za-zА-Яа-яЁё0-9!@#$%^&*()_+\-=\[\]{};:\'"\\|,.<>\/?`~]+$/;
+        if (!validChars.test(newPassword)) {
+          errorText.textContent = "Пароль может содержать только латиницу, кириллицу, цифры и стандартные спецсимволы.";
+          errorText.classList.remove("hide");
+          passwordInput.value = "";
+          return;
+        }
+
+        // TODO Сделать отправку данных на сервер для создания нового администратора
+        console.log("Создание нового администратора:", newLogin, newPassword);
+        loginInput.value = "";
+        passwordInput.value = "";
+        clearError();
+      };
+    },
+    onHide(instance) {
+      const errorText = instance.popper.querySelector("#addAdminError");
+      const loginInput = instance.popper.querySelector("#newAdminLogin");
+      const passwordInput = instance.popper.querySelector("#newAdminPassword");
+      loginInput.value = "";
+      passwordInput.value = "";
+      errorText.textContent = "";
+      errorText.classList.add("hide");
+    }
+})
 
 async function makeRequest(url, method, headers, bodyData = 0) {
   if (bodyData != 0) {
