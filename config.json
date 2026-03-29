@@ -8,13 +8,6 @@
     "log_level": "info",
     "access_log": true
   },
-  "database": {
-    "dbname": "lemurdb",
-    "user": "postgres",
-    "password": "ad12mH2#innn",
-    "host": "127.0.0.1",
-    "port": "5432"
-  },
   "site": {
     "URL": "http://127.0.0.1:5500/module/index.html"
   },

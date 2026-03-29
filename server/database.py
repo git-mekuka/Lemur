@@ -5,18 +5,19 @@ from datetime import date
 import json
 import os
 from argon2 import PasswordHasher # type: ignore
+from dotenv import load_dotenv # type: ignore
+
 
 ph = PasswordHasher()
 
-# Загрузка конфигурации из config.json
-config_path = os.path.join(os.path.dirname(__file__), '..', 'config.json')
-with open(config_path, 'r', encoding='utf-8') as f:
-    config = json.load(f)
+# загружаем переменные из .env
+load_dotenv()
 
-db_config = config['database']
-db_config['port'] = int(db_config['port'])
+# получаем строку подключения
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-connection = psycopg2.connect(**db_config)
+# подключаемся к базе
+connection = psycopg2.connect(DATABASE_URL)
 
 def login_status(login, password):
     cursor = connection.cursor()
