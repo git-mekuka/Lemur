@@ -46,7 +46,6 @@ let deviceDesktopPrecent = document.getElementById("deviceDesktopPrecent");
 let deviceTabletPrecent = document.getElementById("deviceTabletPrecent");
 let deviceOtherPrecent = document.getElementById("deviceOtherPrecent");
 let browserListContainer = document.getElementById("browserListContainer");
-let currentlyUser;
 let choiceMonthScore = 0;
 let profileScore = 0;
 let createCategoryScore = 0;
@@ -808,8 +807,10 @@ async function getUserData() {
     "Content-Type": "application/json",
   });
   let userData = await result.json();
-  currentlyUser = userData.permission;
   sessionUser.textContent = userData.user;
+  if (userData.permission == "admin") {
+    document.getElementById("addNewAdmin").classList.add("hide");
+  }
   tippy("#profileButton", {
     content: `
       <div class="pv2-container">
@@ -1017,8 +1018,14 @@ async function  getUsersData() {
   });
   let usersData = await result.json();
 
+  let data = await makeRequest(`${LEMUR_SITE_URL}/api/userData`, "GET", {
+    "Content-Type": "application/json",
+  });
+  let userData = await data.json();
+  let currentlyUserPerm = userData.permission;
+
   for (let userData of usersData){
-    if (currentlyUser == "owner"){
+    if (currentlyUserPerm == "owner"){
       if (userData[2] == "owner"){
         adminsList.innerHTML += 
         `
@@ -1156,6 +1163,33 @@ tippy("#addNewAdmin", {
 
         // TODO Сделать отправку данных на сервер для создания нового администратора
         console.log("Создание нового администратора:", newLogin, newPassword);
+        let result = await makeRequest(`${LEMUR_SITE_URL}/api/createAdmin`, "POST", {"Content-Type": "application/json"}, {"login": newLogin, "password": newPassword});
+        let status = await result.status;
+        if (status == 200){
+          adminsList.innerHTML = ``;
+          getUsersData();
+        }     
+        else if (status == 403){
+          loginInput.value = "";
+          passwordInput.value = "";
+
+          errorText.textContent = "У вас нет прав для создания администратора.";
+          errorText.classList.remove("hide");
+          return;
+        }   
+        else{
+          loginInput.value = "";
+          passwordInput.value = "";
+
+          errorText.textContent = "Не удалось создать администратора. Возможно, логин уже занят.";
+          errorText.classList.remove("hide");
+          return;
+        }
+
+
+        instance.hide();
+
+
         loginInput.value = "";
         passwordInput.value = "";
         clearError();

@@ -4,6 +4,9 @@ from colorama import Fore, Style
 from datetime import date
 import json
 import os
+from argon2 import PasswordHasher # type: ignore
+
+ph = PasswordHasher()
 
 # Загрузка конфигурации из config.json
 config_path = os.path.join(os.path.dirname(__file__), '..', 'config.json')
@@ -17,22 +20,27 @@ connection = psycopg2.connect(**db_config)
 
 def login_status(login, password):
     cursor = connection.cursor()
-    cursor.execute("SELECT login, password FROM admins WHERE login = %s AND password = %s", (login, password))
-    status =  bool(len(cursor.fetchall()))
+    cursor.execute("SELECT password FROM admins WHERE login = %s", (login,))
+    hash = cursor.fetchone()
+
+    if hash is None:
+        print(Fore.BLUE + Style.BRIGHT +"Lemur [DataBase]:" + Fore.RESET + Style.RESET_ALL + " Логин-статус получен, значение " + Fore.RESET + Style.BRIGHT + Fore.LIGHTBLUE_EX + "False" + Style.RESET_ALL)
+        return False
 
     connection.commit()
     cursor.close()
-    
-    if status == True:
-        print(Fore.BLUE + Style.BRIGHT +"Lemur [DataBase]:" + Fore.RESET + Style.RESET_ALL + " Логин-статус получен, значение " + Fore.RESET + Style.BRIGHT + Fore.LIGHTBLUE_EX + f"{status}" + Style.RESET_ALL)
+
+    try:
+        ph.verify(hash[0], password)
+        print(Fore.BLUE + Style.BRIGHT +"Lemur [DataBase]:" + Fore.RESET + Style.RESET_ALL + " Логин-статус получен, значение " + Fore.RESET + Style.BRIGHT + Fore.LIGHTBLUE_EX + "True" + Style.RESET_ALL)
         return True
-    else:
-        print(Fore.BLUE + Style.BRIGHT +"Lemur [DataBase]:" + Fore.RESET + Style.RESET_ALL + " Логин-статус получен, значение " + Fore.RESET + Style.BRIGHT + Fore.LIGHTBLUE_EX + f"{status}" + Style.RESET_ALL)
+    except:
+        print(Fore.BLUE + Style.BRIGHT +"Lemur [DataBase]:" + Fore.RESET + Style.RESET_ALL + " Логин-статус получен, значение " + Fore.RESET + Style.BRIGHT + Fore.LIGHTBLUE_EX + "False" + Style.RESET_ALL)
         return False
 
 def new_admin(login, password):
     cursor = connection.cursor()
-    cursor.execute("SELECT id FROM admins")
+    cursor.execute("SELECT user_id FROM admins")
     id = len(cursor.fetchall()) + 1
     
     cursor.execute("SELECT login FROM admins")
@@ -41,23 +49,29 @@ def new_admin(login, password):
 
     if cortege_login[0] in check_login:
         print(Fore.LIGHTRED_EX + Style.BRIGHT +"Lemur [DataBase]:" + Fore.RESET + Style.RESET_ALL + " Администратор с таким логином уже существует!\n")
+        return "400"
     else:
         try:
-            cursor.execute("INSERT INTO admins VALUES(%s, %s, %s)", (id, login, password))
+            password = ph.hash(password)
+            cursor.execute("INSERT INTO admins VALUES(%s, %s, %s, %s)", (id, login, password, "admin"))
+            connection.commit()
             print(Fore.BLUE + Style.BRIGHT +"Lemur [DataBase]:" + Fore.RESET + Style.RESET_ALL + " Успешно создан администратор:" + Style.DIM + f"\n LOGIN: {login}\n PASSWORD: {password}\n ID: {id}\n")
-        except:
-            print(Fore.LIGHTRED_EX + Style.BRIGHT +"Lemur [DataBase]:" + Fore.RESET + Style.RESET_ALL + " Не удалось создать нового администратора")
+            return "200"
+        except Exception as e:
+            print(Fore.LIGHTRED_EX + Style.BRIGHT +"Lemur [DataBase]:" + Fore.RESET + Style.RESET_ALL + f" Не удалось создать нового администратора. Ошибка: {e}")
+            connection.rollback()
+            return "400"
+        finally:
+            cursor.close()
 
-    connection.commit()
-    cursor.close()
 
 def edit_events(event, date, time, timezoneOffset, device, countryCode, region, browser, trafficSource):
     cursor = connection.cursor()
     try:
         cursor.execute("INSERT INTO events VALUES (%s, %s, %s, %s, %s, %s, %s)", (event, f"{date} {time} {"+" if int(timezoneOffset) > 0 else ""}{timezoneOffset}", device, countryCode, region, browser, trafficSource))
         print(Fore.BLUE + Style.BRIGHT +"Lemur [DataBase]:" + Fore.RESET + Style.RESET_ALL + " Успешный запрос в базу данных")
-    except:
-        print(Fore.LIGHTRED_EX + Style.BRIGHT +"Lemur [DataBase]:" + Fore.RESET + Style.RESET_ALL + " Не удалось выполнить запрос в базу данных")
+    except Exception as e:
+        print(Fore.LIGHTRED_EX + Style.BRIGHT +"Lemur [DataBase]:" + Fore.RESET + Style.RESET_ALL + f" Не удалось выполнить запрос в базу данных. Ошибка: {e}")
     
     connection.commit()
     cursor.close()
@@ -244,6 +258,8 @@ def get_events_metrics(event, month = date.today().month, year = date.today().ye
         return event_data
     except Exception as e:
         print(Fore.LIGHTRED_EX + Style.BRIGHT +"Lemur [DataBase]:" + Fore.RESET + Style.RESET_ALL + f" Не удалось выполнить запрос в базу данных. Ошибка: {e}")
+    finally:
+        cursor.close()
 
 def get_user_permission(user):
     cursor = connection.cursor()
@@ -258,6 +274,8 @@ def get_user_permission(user):
     except Exception as e:
         print(Fore.LIGHTRED_EX + Style.BRIGHT +"Lemur [DataBase]:" + Fore.RESET + Style.RESET_ALL + f" Не удалось выполнить запрос в базу данных. Ошибка: {e}")
         return "undefined"
+    finally:
+        cursor.close()
 
 def get_users_data_db():
     cursor = connection.cursor()
@@ -265,6 +283,7 @@ def get_users_data_db():
     cursor.execute('SELECT "user_id","login","permission" FROM admins ORDER BY user_id ASC')
     data = cursor.fetchall()
 
+    cursor.close()
     print(Fore.BLUE + Style.BRIGHT +"Lemur [DataBase]:" + Fore.RESET + Style.RESET_ALL + " Успешный запрос в базу данных")
 
     return data
@@ -275,27 +294,40 @@ def delete_user_db(user_id):
 
     try:
         cursor.execute("DELETE FROM admins WHERE user_id = %s", (user_id,))
+        connection.commit()
         return "200"
     except Exception as e:
         print(Fore.LIGHTRED_EX + Style.BRIGHT +"Lemur [DataBase]:" + Fore.RESET + Style.RESET_ALL + f" Не удалось выполнить запрос в базу данных. Ошибка: {e}")
+        connection.rollback()
         return "400"
+    finally:
+        cursor.close()
 
 def edit_password_db(user, new_password):
     cursor = connection.cursor()
-
+    new_password = ph.hash(new_password)
     try:
         cursor.execute("UPDATE admins SET password = %s WHERE login = %s", (new_password, user))
+        connection.commit()
         return "200"
     except Exception as e:
         print(Fore.LIGHTRED_EX + Style.BRIGHT +"Lemur [DataBase]:" + Fore.RESET + Style.RESET_ALL + f" Не удалось выполнить запрос в базу данных. Ошибка: {e}")
+        connection.rollback()
         return "400"
-    
+    finally:
+        cursor.close()
+
+
 def edit_login_db(user, new_login):
     cursor = connection.cursor()
 
     try:
         cursor.execute("UPDATE admins SET login = %s WHERE login = %s", (new_login, user))
+        connection.commit()
         return "200"
     except Exception as e:
         print(Fore.LIGHTRED_EX + Style.BRIGHT +"Lemur [DataBase]:" + Fore.RESET + Style.RESET_ALL + f" Не удалось выполнить запрос в базу данных. Ошибка: {e}")
+        connection.rollback()
         return "400"
+    finally:        
+        cursor.close()

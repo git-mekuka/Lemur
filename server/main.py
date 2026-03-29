@@ -7,7 +7,7 @@ from pydantic import BaseModel # type: ignore
 
 from colorama import Fore, Style
 
-from database import login_status, edit_events, get_events_metrics, get_user_permission, get_users_data_db, delete_user_db, edit_password_db, edit_login_db
+from database import login_status, edit_events, get_events_metrics, get_user_permission, get_users_data_db, delete_user_db, edit_password_db, edit_login_db, new_admin
 
 from datetime import datetime, timedelta
 import time
@@ -284,6 +284,28 @@ def edit_login(newLogin: NewLogin, request: Request):
             raise HTTPException(status_code=400, detail="Failed to change login")
     else:
         raise HTTPException(status_code=400, detail="User not authenticated")
+
+class NewAdminData(BaseModel):
+    login: str
+    password: str
+
+@app.post("/api/createAdmin")
+def create_admin(admin_data: NewAdminData, request: Request):
+    token = request.cookies.get("token")
+    user = sessions[token]["user"]
+
+    if get_user_permission(user) != "owner":
+        raise HTTPException(status_code=403, detail="Creating new administrators requires the 'owner' role")
+    else:
+        create_result = login_status(admin_data.login, admin_data.password)
+        if create_result == False:
+            edit_result = new_admin(admin_data.login, admin_data.password)
+            if edit_result == "200":
+                raise HTTPException(status_code=200, detail="Admin created successfully")
+            else:
+                raise HTTPException(status_code=400, detail="Failed to create admin")
+        else:
+            raise HTTPException(status_code=400, detail="A user with this login already exists")
 
 @app.middleware("http")
 async def test(request: Request, call_next):
