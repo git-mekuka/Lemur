@@ -17,7 +17,7 @@ import urllib.request
 import urllib.error
 import json
 
-with open('\Lemur\config.json', 'r', encoding='utf-8') as file:
+with open('../config.json', 'r', encoding='utf-8') as file:
     config_data = json.load(file)
 
 site_url = config_data["site"]["URL"]
