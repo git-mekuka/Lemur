@@ -68,14 +68,29 @@ def new_admin(login, password):
 
 def edit_events(event, date, time, timezoneOffset, device, countryCode, region, browser, trafficSource):
     cursor = connection.cursor()
-    try:
-        cursor.execute("INSERT INTO events VALUES (%s, %s, %s, %s, %s, %s, %s)", (event, f"{date} {time} {"+" if int(timezoneOffset) > 0 else ""}{timezoneOffset}", device, countryCode, region, browser, trafficSource))
-        print(Fore.BLUE + Style.BRIGHT +"Lemur [DataBase]:" + Fore.RESET + Style.RESET_ALL + " Успешный запрос в базу данных")
-    except Exception as e:
-        print(Fore.LIGHTRED_EX + Style.BRIGHT +"Lemur [DataBase]:" + Fore.RESET + Style.RESET_ALL + f" Не удалось выполнить запрос в базу данных. Ошибка: {e}")
     
-    connection.commit()
-    cursor.close()
+    # Формируем строку даты правильно
+    if int(timezoneOffset) > 0:
+        offset_str = f"+{timezoneOffset}"
+    else:
+        offset_str = timezoneOffset  # уже должно быть с минусом
+    
+    date_string = f"{date} {time}{offset_str}"
+    
+    try:
+        cursor.execute(
+            "INSERT INTO events VALUES (%s, %s, %s, %s, %s, %s, %s)", 
+            (event, date_string, device, countryCode, region, browser, trafficSource)
+        )
+        print(Fore.BLUE + Style.BRIGHT + "Lemur [DataBase]:" + Fore.RESET + Style.RESET_ALL + " Успешный запрос в базу данных")
+    except Exception as e:
+        print(Fore.LIGHTRED_EX + Style.BRIGHT + "Lemur [DataBase]:" + Fore.RESET + Style.RESET_ALL + f" Не удалось выполнить запрос в базу данных. Ошибка: {e}")
+        connection.rollback()  # ← важно откатить при ошибке!
+        raise  # ← пробросить ошибку дальше, чтобы клиент узнал о проблеме
+    else:
+        connection.commit()
+    finally:
+        cursor.close()
 
 def get_events_metrics(event, month = date.today().month, year = date.today().year):
     cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
