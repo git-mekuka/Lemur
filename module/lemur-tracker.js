@@ -144,16 +144,22 @@ async function getGeolocation() {
   } 
   else {
     try {
-      const result = await makeRequest(`http://ip-api.com/json/${"92.39.217.161"}`, "GET", {"Content-Type": "application/json"});
+      // const result = await makeRequest(`http://ip-api.com/json/${await getIp()}`, "GET", {"Content-Type": "application/json"});
+      // const geolocation = await result.json();
+
+      // let countryCode = null;
+      // let region = null;
+
+      // if (geolocation.status == "success") {
+      //   countryCode = geolocation.countryCode;
+      //   region = geolocation.region;
+      // }
+
+      const result = await makeRequest(`${LEMUR_SITE_URL}/api/getGeoData?user_ip=${await getIp()}`, "GET", {"Content-Type": "application/json"});
       const geolocation = await result.json();
 
-      let countryCode = null;
-      let region = null;
-
-      if (geolocation.status == "success") {
-        countryCode = geolocation.countryCode;
-        region = geolocation.region;
-      }
+      countryCode = geolocation.countryCode;
+      region = geolocation.region;
 
       const geoData = { countryCode: countryCode, region: region };
       sessionStorage.setItem("geolocation", JSON.stringify(geoData));

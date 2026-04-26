@@ -307,6 +307,31 @@ def create_admin(admin_data: NewAdminData, request: Request):
         else:
             raise HTTPException(status_code=400, detail="A user with this login already exists")
 
+@app.get("/api/getGeoData")
+def get_geo_data(user_ip = ""):
+    if user_ip:
+        ip = user_ip
+        request = urllib.request.Request(
+            f"http://ip-api.com/json/{ip}",
+            headers={"Content-Type": "application/json"}
+        )
+        with urllib.request.urlopen(request) as response:
+            geolocation = json.load(response)
+
+        country_code = "[null]"
+        region = "[null]"
+
+        if geolocation.get("status") == "success":
+            country_code = geolocation.get("countryCode")
+            region = geolocation.get("region")
+
+        geo_data = {"countryCode": country_code, "region": region}
+        return geo_data
+
+    else:
+        print(Style.BRIGHT + Fore.LIGHTRED_EX + "Lemur [Main]:" + Style.RESET_ALL + " Ошибка получения геолокации")
+        return {"countryCode": "[null]", "region": "[null]"}
+
 @app.middleware("http")
 async def test(request: Request, call_next):
     path = request.url.path
