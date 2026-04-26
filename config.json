@@ -9,7 +9,7 @@
     "access_log": true
   },
   "site": {
-    "URL": "http://127.0.0.1:5500/module/index.html"
+    "URL": "https://git-mekuka.github.io/Lemur-tracker/"
   },
   "auth": {
     "session_max_age_seconds": 3600 
